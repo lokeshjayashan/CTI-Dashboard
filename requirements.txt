@@ -1,0 +1,7 @@
+flask
+pymongo
+requests
+transformers
+torch
+bertopic
+scikit-learn

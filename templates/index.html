@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="AI-powered Cyber Threat Intelligence Dashboard" />
+    <title>CTI Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header id="top-header">
+        <div class="header-left">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+                class="logo-icon">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <h1>CTI <span class="accent">Dashboard</span></h1>
+        </div>
+        <div class="header-right">
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">Connecting…</span>
+        </div>
+    </header>
+
+    <!-- Dashboard -->
+    <main id="dashboard">
+
+        <!-- KPI Cards -->
+        <section class="kpi-row">
+            <div class="kpi-card">
+                <span class="kpi-value" id="kpi-total-val">0</span>
+                <span class="kpi-label">Total Analyses</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-value kpi-threat" id="kpi-threats-val">0</span>
+                <span class="kpi-label">Threats Detected</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-value kpi-critical" id="kpi-critical-val">0</span>
+                <span class="kpi-label">Critical</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-value kpi-safe" id="kpi-safe-val">0</span>
+                <span class="kpi-label">Low</span>
+            </div>
+        </section>
+
+        <!-- Analyze Input -->
+        <section class="card" id="input-section">
+            <h2>🔍 Analyze Threat</h2>
+            <p class="subtitle">Enter an IP, URL, or threat description</p>
+            <div class="input-row">
+                <select id="input-type">
+                    <option value="">Auto-detect</option>
+                    <option value="ip">IP Address</option>
+                    <option value="url">URL</option>
+                    <option value="text">Free Text</option>
+                </select>
+                <input type="text" id="input-value" placeholder="e.g. 185.220.101.1 or https://evil.example.com" />
+                <button id="btn-analyze" onclick="analyzeInput()">Analyze</button>
+            </div>
+            <div id="input-status" class="input-status"></div>
+        </section>
+
+        <!-- Analysis Result -->
+        <section class="card hidden" id="result-section">
+            <h2>📋 Analysis Result</h2>
+            <div class="result-grid" id="result-grid"></div>
+        </section>
+
+        <!-- Charts -->
+        <section class="charts-row">
+            <div class="card">
+                <h2>Attack Categories</h2>
+                <div class="chart-wrap"><canvas id="chart-categories"></canvas></div>
+            </div>
+            <div class="card">
+                <h2>Severity Distribution</h2>
+                <div class="chart-wrap"><canvas id="chart-severity"></canvas></div>
+            </div>
+            <div class="card">
+                <h2>Top Malicious IPs</h2>
+                <div class="chart-wrap"><canvas id="chart-ips"></canvas></div>
+            </div>
+        </section>
+
+        <!-- Emerging Topics -->
+        <section class="card" id="topics-section">
+            <h2>🔥 Emerging Threat Topics</h2>
+            <div id="topics-container" class="topics-grid">
+                <p class="empty">No topics yet — analyze more threats to generate trends.</p>
+            </div>
+        </section>
+
+        <!-- Threat Feed Table -->
+        <section class="card" id="feed-section">
+            <h2>📡 Live Threat Feed</h2>
+            <div class="table-wrap">
+                <table id="threat-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Type</th>
+                            <th>Indicator</th>
+                            <th>Category</th>
+                            <th>Confidence</th>
+                            <th>Severity</th>
+                        </tr>
+                    </thead>
+                    <tbody id="threat-table-body">
+                        <tr>
+                            <td colspan="6" class="empty">No data yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>CTI Dashboard &copy; 2026 — CTI Dashboard</footer>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+
+</html>
