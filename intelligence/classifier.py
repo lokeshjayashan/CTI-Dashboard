@@ -55,6 +55,7 @@ def classify_threat(text: str) -> dict:
         security_check = clf(
             cleaned,
             candidate_labels=["cybersecurity threat", "benign / not a threat"],
+            multi_label=False,
         )
         threat_score = 0.0
         for label, score in zip(security_check["labels"], security_check["scores"]):
@@ -62,10 +63,10 @@ def classify_threat(text: str) -> dict:
                 threat_score = score
                 break
 
-        is_threat = threat_score >= 0.50
+        is_threat = threat_score >= 0.55
 
         # Second: classify among threat categories
-        result = clf(cleaned, candidate_labels=THREAT_CATEGORIES)
+        result = clf(cleaned, candidate_labels=THREAT_CATEGORIES, multi_label=False)
         all_scores = {
             label: round(score, 4)
             for label, score in zip(result["labels"], result["scores"])

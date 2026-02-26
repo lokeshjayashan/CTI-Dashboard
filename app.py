@@ -88,29 +88,69 @@ def analyze():
 
     # ── 2. AI classification ──────────────────────────────────
     text_to_classify = value
+    api_says_safe = False  # Track whether reputation APIs indicate safety
+
     if input_type == "ip" and reputation:
         if "error" not in reputation and reputation.get("abuse_score") is not None:
-            # build a richer sentence for the classifier
             abuse = reputation.get("abuse_score", 0)
             reports = reputation.get("total_reports", 0)
-            text_to_classify = (
-                f"IP address {value} has abuse confidence score {abuse}% "
-                f"and {reports} abuse reports."
-            )
+            is_whitelisted = reputation.get("is_whitelisted", False)
+
+            if abuse == 0 and reports == 0:
+                # API explicitly says this IP is clean
+                api_says_safe = True
+                text_to_classify = (
+                    f"IP address {value} is clean with 0% abuse score, "
+                    f"zero reports, and is considered safe."
+                )
+            elif is_whitelisted:
+                api_says_safe = True
+                text_to_classify = (
+                    f"IP address {value} is whitelisted and considered safe."
+                )
+            else:
+                text_to_classify = (
+                    f"IP address {value} has {abuse}% abuse confidence score "
+                    f"and {reports} abuse reports, indicating potential threat activity."
+                )
         else:
             text_to_classify = f"Analyze this IP address for threats: {value}"
+
     elif input_type == "url" and reputation:
         positives = reputation.get("positives", 0)
         total = reputation.get("total", 0)
         if "error" not in reputation and total > 0:
-            text_to_classify = (
-                f"URL {value} flagged by {positives} out of {total} security vendors."
-            )
+            if positives == 0:
+                # Scanned by many vendors, none detected anything
+                api_says_safe = True
+                text_to_classify = (
+                    f"URL {value} was scanned by {total} security vendors "
+                    f"and none detected it as malicious. It appears safe."
+                )
+            else:
+                text_to_classify = (
+                    f"URL {value} was detected as malicious by {positives} "
+                    f"out of {total} security vendors."
+                )
         else:
-            # No API data available — give the classifier the raw URL
             text_to_classify = f"Analyze this URL for threats: {value}"
 
     classification = classify_threat(text_to_classify)
+
+    # ── 2b. Reputation‑based override ──────────────────────────
+    # If the API data clearly indicates the input is safe AND the AI
+    # classifier has low confidence, override the result to benign.
+    # Rationale: 94 security vendors > a general-purpose NLI model.
+    # Only a very high-confidence classification (>85%) should override
+    # explicit API safety data.
+    if api_says_safe and classification.get("is_threat"):
+        confidence = classification.get("confidence", 0)
+        if confidence < 0.85:
+            classification["is_threat"] = False
+            classification["category"] = "benign"
+            classification["confidence"] = round(1 - confidence, 4)
+            classification["override_reason"] = "API reputation data indicates safe"
+
     result["classification"] = classification
 
     # ── 3. Severity derivation ─────────────────────────────────
